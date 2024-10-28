@@ -1,0 +1,257 @@
+<%- include('includes/head') %>
+
+<body class="bg-gray-100">
+  <%- include('includes/nav') %>
+  
+  <div class="container mx-auto mt-8 px-4">
+    <h1 class="text-2xl font-bold mb-4">Detalhes do Usuário</h1>
+
+    <div class="bg-white shadow-md rounded p-4 mb-6">
+      <h2 class="text-xl font-semibold">Informações do Usuário</h2>
+      <p><strong>ID:</strong> <%= data.user.id %></p>
+      <p><strong>CPF:</strong> <%= data.user.cpf %></p>
+      <p><strong>Perfil:</strong> <%= data.user.profile %></p>
+      
+      <div class="mt-4">
+        <label for="userName" class="block font-semibold">Nome:</label>
+        <input type="text" id="userName" value="<%= data.user.name %>" class="border border-gray-300 p-2 rounded w-full sm:w-1/2" />
+        <button type="button" onclick="updateUserName(<%= data.user.id %>)" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Salvar</button>
+      </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded p-4 mb-6">
+      <h2 class="text-xl font-semibold">E-mails</h2>
+      <p><strong>Email Principal:</strong> <%= data.primaryEmail ? data.primaryEmail.email : 'Não definido' %></p>
+
+      <ul>
+        <% data.emails.forEach(function(email) { %>
+          <li>
+            <%= email.email %> 
+            <% if (!email.isPrimary) { %>
+              <button onclick="setPrimaryEmail(<%= email.id %>, <%= data.user.id %>)" class="text-blue-500">Definir como principal</button>
+              <button onclick="deleteEmail(<%= email.id %>)" class="text-red-500">Remover</button>
+            <% } %>
+          </li>
+        <% }); %>
+      </ul>
+
+      <form id="addEmailForm" class="mt-4">
+        <input type="email" id="newEmail" placeholder="Adicionar novo email" class="border p-2 rounded" required />
+        <button type="button" onclick="addEmail()" class="bg-blue-500 text-white px-4 py-2 rounded">Adicionar</button>
+      </form>
+    </div>
+
+    <div class="bg-white shadow-md rounded p-4 mb-6">
+      <h2 class="text-xl font-semibold">Telefones</h2>
+      <p><strong>Telefone Principal:</strong> <%= data.primaryPhone ? data.primaryPhone.phoneNumber : 'Não definido' %></p>
+
+      <ul>
+        <% data.phones.forEach(function(phone) { %>
+          <li>
+            <%= phone.phoneNumber %> 
+            <% if (!phone.isPrimary) { %>
+              <button onclick="setPrimaryPhone(<%= phone.id %>, <%= data.user.id %>)" class="text-blue-500">Definir como principal</button>
+              <button onclick="deletePhone(<%= phone.id %>)" class="text-red-500">Remover</button>
+            <% } %>
+          </li>
+        <% }); %>
+      </ul>
+
+      <form id="addPhoneForm" class="mt-4">
+        <input type="text" id="newPhone" placeholder="Adicionar novo telefone" class="border p-2 rounded" required />
+        <button type="button" onclick="addPhone()" class="bg-blue-500 text-white px-4 py-2 rounded">Adicionar</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    async function updateUserName(userId) {
+      const nameInput = document.getElementById('userName');
+      const newName = nameInput.value.trim();
+
+      if (!newName) {
+        Swal.fire('Erro', 'Por favor, insira um nome válido.', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/users/${userId}/updateName`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          Swal.fire('Sucesso', 'Nome atualizado com sucesso!', 'success').then(() => {
+            nameInput.value = newName; // Atualiza o nome na interface
+          });
+        } else {
+          Swal.fire('Erro', data.errorMessage || 'Houve um problema ao atualizar o nome.', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao atualizar o nome:', error);
+        Swal.fire('Erro', 'Houve um problema ao atualizar o nome.', 'error');
+      }
+    }
+
+    async function setPrimaryEmail(emailId, userId) {
+      try {
+        const response = await fetch(`/users/email/${emailId}/setPrimary`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+    
+        const data = await response.json();
+    
+        if (data.error) {
+          Swal.fire('Erro!', data.error, 'error');
+        } else {
+          Swal.fire('Sucesso!', 'Email definido como principal com sucesso!', 'success');
+          location.reload();
+        }
+      } catch (error) {
+        Swal.fire('Erro!', 'Erro ao definir email como principal.', 'error');
+        console.error('Erro ao definir email como principal:', error);
+      }
+    }
+    
+
+    async function deleteEmail(emailId) {
+      try {
+        const response = await fetch(`/users/email/${emailId}/delete`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+    
+        const data = await response.json();
+    
+        if (data.error) {
+          Swal.fire('Erro!', data.error, 'error');
+        } else {
+          Swal.fire('Excluído!', 'Email removido com sucesso!', 'success');
+          location.reload();
+        }
+      } catch (error) {
+        Swal.fire('Erro!', 'Erro ao remover email.', 'error');
+        console.error('Erro ao remover email:', error);
+      }
+    }
+    
+
+    async function addEmail() {
+      const emailInput = document.getElementById('newEmail');
+      const email = emailInput.value.trim();
+    
+      if (!email) {
+        Swal.fire('Erro!', 'Por favor, insira um e-mail válido.', 'error');
+        return;
+      }
+    
+      try {
+        const response = await fetch(`/users/email/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: <%= data.user.id %>, email })
+        });
+    
+        const data = await response.json();
+    
+        if (data.error) {
+          Swal.fire('Erro!', data.error, 'error');
+        } else {
+          Swal.fire('Sucesso!', 'Email adicionado com sucesso!', 'success');
+          location.reload();
+        }
+      } catch (error) {
+        Swal.fire('Erro!', 'Erro ao adicionar email.', 'error');
+        console.error('Erro ao adicionar email:', error);
+      }
+    }
+    
+
+    async function setPrimaryPhone(phoneId, userId) {
+      try {
+        const response = await fetch(`/users/phone/${phoneId}/setPrimary`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+    
+        const data = await response.json();
+    
+        if (data.error) {
+          Swal.fire('Erro!', data.error, 'error');
+        } else {
+          Swal.fire('Sucesso!', 'Telefone definido como principal com sucesso!', 'success');
+          location.reload();
+        }
+      } catch (error) {
+        Swal.fire('Erro!', 'Erro ao definir telefone como principal.', 'error');
+        console.error('Erro ao definir telefone como principal:', error);
+      }
+    }
+    
+
+    async function deletePhone(phoneId) {
+      try {
+        const response = await fetch(`/users/phone/${phoneId}/delete`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+    
+        const data = await response.json();
+    
+        if (data.error) {
+          Swal.fire('Erro!', data.error, 'error');
+        } else {
+          Swal.fire('Excluído!', 'Telefone removido com sucesso!', 'success');
+          location.reload();
+        }
+      } catch (error) {
+        Swal.fire('Erro!', 'Erro ao remover telefone.', 'error');
+        console.error('Erro ao remover telefone:', error);
+      }
+    }
+    
+
+    async function addPhone() {
+      const phoneInput = document.getElementById('newPhone');
+      const phone = phoneInput.value.trim();
+    
+      if (!phone) {
+        Swal.fire('Erro!', 'Por favor, insira um telefone válido.', 'error');
+        return;
+      }
+    
+      try {
+        const response = await fetch(`/users/phone/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: <%= data.user.id %>, phone })
+        });
+        
+        const data = await response.json();
+        console.log(data)
+        if (data.error) {
+          Swal.fire('Erro!', data.error, 'error');
+        } else {
+          Swal.fire('Sucesso!', 'Telefone adicionado com sucesso!', 'success');
+          setTimeout(() => {
+            location.reload();
+          }, 1500); // Espera d
+        }
+      } catch (error) {
+        Swal.fire('Erro!', 'Erro ao adicionar telefone.', 'error');
+        console.error('Erro ao adicionar telefone:', error);
+      }
+    }
+    
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,103 @@
+<%- include('includes/head') %>
+<body>
+  <%- include('includes/nav') %>
+  <div class="container mx-auto mt-5">
+
+    <form id="userForm" class="bg-white p-6 rounded shadow-md">
+      <div class="mb-4">
+        <label for="cpf" class="block text-sm font-medium text-gray-700">CPF</label>
+        <input
+          type="text"
+          class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+          id="cpf"
+          name="cpf"
+          placeholder="Enter CPF"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+        <input
+          type="text"
+          class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+          id="name"
+          name="name"
+          placeholder="Enter name"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input
+          type="email"
+          class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+          id="email"
+          name="email"
+          placeholder="Enter email"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label for="phone" class="block text-sm font-medium text-gray-700">Phone (DDD)</label>
+        <input
+          type="text"
+          class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+          id="phone"
+          name="phone"
+          placeholder="Example: (53) 9598-6295"
+          required
+        />
+      </div>
+      <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200">Register</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('userForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const formData = {
+        cpf: document.getElementById('cpf').value,
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+      };
+
+      try {
+        const response = await fetch('/users/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          Swal.fire({
+            title: 'Sucesso!',
+            text: 'Usuário cadastrado com sucesso!',
+            icon: 'success',
+            confirmButtonText: 'Ok'
+          });
+          document.getElementById('userForm').reset(); // Reseta o formulário se for bem-sucedido
+        } else {
+          Swal.fire({
+            title: 'Erro!',
+            text: data.errorMessage || 'Houve um problema ao cadastrar o usuário.',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+          });
+        }
+      } catch (error) {
+        console.error('Erro:', error);
+        Swal.fire({
+          title: 'Erro!',
+          text: 'Houve um problema ao cadastrar o usuário.',
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        });
+      }
+    });
+  </script>
+</body>
+</html>

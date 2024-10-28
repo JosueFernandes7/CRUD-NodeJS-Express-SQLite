@@ -1,0 +1,26 @@
+<% for (let i = 0; i < data.users.length; i++) { %>
+    <tr class="border-b border-gray-200 hover:bg-gray-100">
+      <td class="py-2 px-4 text-left whitespace-nowrap"><%= data.users[i].id %></td>
+      <td class="py-2 px-4 text-left"><%= data.users[i].name %></td>
+      <td class="py-2 px-4 text-left"><%= data.users[i].cpf %></td>
+      <td class="py-2 px-4 text-left"><%= data.users[i].primaryEmail %></td>
+      <td class="py-2 px-4 text-left"><%= data.users[i].primaryPhone %></td>
+      <td class="py-2 px-4 text-left"><%= data.users[i].profile %></td>
+      <td class="py-2 px-4 text-center">
+        <div class="flex items-center justify-center space-x-2">
+          <a href="/users/<%= data.users[i].id %>/details" class="flex items-center justify-center">
+            <img src="https://cdn-icons-png.flaticon.com/128/7542/7542177.png" alt="Details" class="w-5 h-5">
+          </a>
+          <a href="/users/<%= data.users[i].id %>/update" class="flex items-center justify-center">
+            <img src="https://cdn-icons-png.flaticon.com/128/8669/8669717.png" alt="Update" class="w-5 h-5">
+          </a>
+          <% if (data.users[i].profile !== 'ADMIN') { %>
+          <a href="/users/<%= data.users[i].id %>/delete" class="flex items-center justify-center deleteBtn">
+            <img src="https://cdn-icons-png.flaticon.com/128/3096/3096687.png" alt="Delete" class="w-5 h-5">
+          </a>
+          <% } %>
+        </div>
+      </td>
+    </tr>
+    <% } %>
+    

@@ -1,0 +1,41 @@
+<%- include('includes/head') %>
+
+<body class="bg-gray-100">
+  <%- include('includes/nav') %>
+  
+  <div class="container mx-auto mt-8 px-4">
+    <h1 class="text-2xl font-bold mb-4">Detalhes do Usuário</h1>
+
+    <div class="bg-white shadow-md rounded p-4 mb-6">
+      <h2 class="text-xl font-semibold">Informações do Usuário</h2>
+      <p><strong>ID:</strong> <%= data.user.id %></p>
+      <p><strong>Nome:</strong> <%= data.user.name %></p>
+      <p><strong>CPF:</strong> <%= data.user.cpf %></p>
+      <p><strong>Perfil:</strong> <%= data.user.profile %></p>
+    </div>
+
+    <div class="bg-white shadow-md rounded p-4 mb-6">
+      <h2 class="text-xl font-semibold">E-mails</h2>
+      <p><strong>Email Principal:</strong> <%= data.primaryEmail ? data.primaryEmail.email : 'Não definido' %></p>
+
+      <ul>
+        <% data.emails.forEach(function(email) { %>
+          <li><%= email.email %></li>
+        <% }); %>
+      </ul>
+    </div>
+
+    <div class="bg-white shadow-md rounded p-4 mb-6">
+      <h2 class="text-xl font-semibold">Telefones</h2>
+      <p><strong>Telefone Principal:</strong> <%= data.primaryPhone ? data.primaryPhone.phoneNumber : 'Não definido' %></p>
+
+      <ul>
+        <% data.phones.forEach(function(phone) { %>
+          <li><%= phone.phoneNumber %></li>
+        <% }); %>
+      </ul>
+    </div>
+  </div>
+
+</body>
+</html>
